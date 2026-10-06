@@ -148,6 +148,7 @@ int main()
             cout << endl;
             cout << "Plainteks: " << hasil << endl;
         }
+        else
         {
             cout << "Pilihan tidak tersedia." << endl;
         }
