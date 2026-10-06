@@ -1,67 +1,57 @@
 #include "caesar.h"
 
-std::string enkripsiCaesar(std::string plainteks, int kunci)
-{
-    std::string cipherteks = "";
+string enkripsiCaesar(string plainteks, int kunci) {
+    string cipherteks = "";
 
-    // Memastikan kunci berada pada rentang 0 sampai 25
+    // memastikan kunci berada di antara 0 sampai 25
     kunci = kunci % 26;
 
-    for (char huruf : plainteks)
-    {
+    if (kunci < 0) {
+        kunci = kunci + 26;
+    }
 
-        // Jika huruf besar A-Z
-        if (huruf >= 'A' && huruf <= 'Z')
-        {
-            char hasil = 'A' + (huruf - 'A' + kunci) % 26;
-            cipherteks += hasil;
+    for (char huruf : plainteks) {
+
+        // enkripsi huruf besar
+        if (huruf >= 'A' && huruf <= 'Z') {
+            huruf = 'A' + (huruf - 'A' + kunci) % 26;
         }
 
-        // Jika huruf kecil a-z
-        else if (huruf >= 'a' && huruf <= 'z')
-        {
-            char hasil = 'a' + (huruf - 'a' + kunci) % 26;
-            cipherteks += hasil;
+        // enkripsi huruf kecil
+        else if (huruf >= 'a' && huruf <= 'z') {
+            huruf = 'a' + (huruf - 'a' + kunci) % 26;
         }
 
-        // Spasi, angka, dan tanda baca tidak diubah
-        else
-        {
-            cipherteks += huruf;
-        }
+        cipherteks += huruf;
     }
 
     return cipherteks;
 }
 
-std::string dekripsiCaesar(std::string cipherteks, int kunci)
-{
-    std::string plainteks = "";
 
+string dekripsiCaesar(string cipherteks, int kunci) {
+    string plainteks = "";
+
+    // memastikan kunci berada di antara 0 sampai 25
     kunci = kunci % 26;
 
-    for (char huruf : cipherteks)
-    {
+    if (kunci < 0) {
+        kunci = kunci + 26;
+    }
 
-        // Jika huruf besar A-Z
-        if (huruf >= 'A' && huruf <= 'Z')
-        {
-            char hasil = 'A' + (huruf - 'A' - kunci + 26) % 26;
-            plainteks += hasil;
+    for (char huruf : cipherteks) {
+
+        // dekripsi huruf besar
+        if (huruf >= 'A' && huruf <= 'Z') {
+            huruf = 'A' + (huruf - 'A' - kunci + 26) % 26;
         }
 
-        // Jika huruf kecil a-z
-        else if (huruf >= 'a' && huruf <= 'z')
-        {
-            char hasil = 'a' + (huruf - 'a' - kunci + 26) % 26;
-            plainteks += hasil;
+        // dekripsi huruf kecil
+        else if (huruf >= 'a' && huruf <= 'z') {
+            huruf = 'a' + (huruf - 'a' - kunci + 26) % 26;
         }
 
-        // Spasi, angka, dan tanda baca tidak diubah
-        else
-        {
-            plainteks += huruf;
-        }
+        plainteks += huruf;
     }
 
     return plainteks;

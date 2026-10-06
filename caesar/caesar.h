@@ -3,7 +3,9 @@
 
 #include <string>
 
-std::string enkripsiCaesar(std::string plainteks, int kunci);
-std::string dekripsiCaesar(std::string cipherteks, int kunci);
+using namespace std;
+
+string enkripsiCaesar(string plainteks, int kunci);
+string dekripsiCaesar(string cipherteks, int kunci);
 
 #endif
