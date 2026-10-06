@@ -204,3 +204,48 @@ string enkripsiPlayfair(string plainteks, string kunci)
 
     return cipherteks;
 }
+
+string dekripsiPlayfair(string cipherteks, string kunci)
+{
+    char matriks[5][5];
+
+    buatMatriksPlayfair(kunci, matriks);
+
+    string teks = bersihkanTeks(cipherteks);
+    string plainteks = "";
+
+    for (int i = 0; i < teks.length(); i += 2)
+    {
+        char huruf1 = teks[i];
+        char huruf2 = teks[i + 1];
+
+        int baris1, kolom1;
+        int baris2, kolom2;
+
+        cariPosisi(matriks, huruf1, baris1, kolom1);
+        cariPosisi(matriks, huruf2, baris2, kolom2);
+
+        // jika berada pada baris yang sama
+        if (baris1 == baris2)
+        {
+            plainteks += matriks[baris1][(kolom1 + 4) % 5];
+            plainteks += matriks[baris2][(kolom2 + 4) % 5];
+        }
+
+        // jika berada pada kolom yang sama
+        else if (kolom1 == kolom2)
+        {
+            plainteks += matriks[(baris1 + 4) % 5][kolom1];
+            plainteks += matriks[(baris2 + 4) % 5][kolom2];
+        }
+
+        // jika membentuk persegi panjang
+        else
+        {
+            plainteks += matriks[baris1][kolom2];
+            plainteks += matriks[baris2][kolom1];
+        }
+    }
+
+    return plainteks;
+}
