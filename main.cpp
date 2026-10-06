@@ -5,7 +5,8 @@
 
 using namespace std;
 
-int main() {
+int main()
+{
     string teks;
     string hasil;
     int kunci;
@@ -25,19 +26,22 @@ int main() {
     cout << "Masukkan kunci: ";
     cin >> kunci;
 
-    if (pilihan == 1) {
+    if (pilihan == 1)
+    {
         hasil = enkripsiCaesar(teks, kunci);
 
         cout << endl;
         cout << "Cipherteks: " << hasil << endl;
     }
-    else if (pilihan == 2) {
+    else if (pilihan == 2)
+    {
         hasil = dekripsiCaesar(teks, kunci);
 
         cout << endl;
         cout << "Plainteks: " << hasil << endl;
     }
-    else {
+    else
+    {
         cout << "Pilihan tidak tersedia." << endl;
     }
 
