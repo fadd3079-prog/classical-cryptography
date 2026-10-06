@@ -28,9 +28,13 @@ string prosesEnkripsi(
     string tampilan = "";
 
     int kelompok;
-
     data.algoritma = algoritma;
+
     data.posisiFiller.clear();
+    data.posisiSpasi.clear();
+
+    // menyimpan posisi spasi sebelum dienkripsi
+    data.posisiSpasi = cariPosisiSpasi(teks);
 
     // caesar cipher
     if (algoritma == 1)
@@ -229,6 +233,11 @@ string prosesDekripsi(
             teks,
             kunci);
     }
+    // mengembalikan spasi yang hilang pada lapisan ini
+    // mengembalikan spasi yang hilang pada lapisan ini
+    hasil = kembalikanSpasi(
+        hasil,
+        data.posisiSpasi);
 
     cout << endl;
     cout << "Hasil dekripsi: "
