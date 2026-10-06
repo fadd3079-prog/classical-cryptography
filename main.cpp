@@ -104,6 +104,55 @@ int main()
         }
     }
 
+    else if (algoritma == 3)
+    {
+        string teks;
+        string hasil;
+        int kunci;
+        int pilihan;
+
+        cout << endl;
+        cout << "=== Transposisi Kolom ===" << endl;
+        cout << "1. Enkripsi" << endl;
+        cout << "2. Dekripsi" << endl;
+        cout << "Pilih: ";
+        cin >> pilihan;
+
+        cin.ignore();
+
+        cout << "Masukkan teks: ";
+        getline(cin, teks);
+
+        cout << "Masukkan jumlah kolom: ";
+        cin >> kunci;
+
+        if (kunci <= 0)
+        {
+            cout << "Kunci harus lebih dari 0." << endl;
+        }
+        else if (pilihan == 1)
+        {
+            tampilkanMatriksTransposisi(teks, kunci);
+
+            hasil = enkripsiTransposisi(teks, kunci);
+
+            cout << endl;
+            cout << "Cipherteks: " << hasil << endl;
+        }
+        else if (pilihan == 2)
+        {
+            hasil = dekripsiTransposisi(teks, kunci);
+
+            tampilkanMatriksTransposisi(hasil, kunci);
+
+            cout << endl;
+            cout << "Plainteks: " << hasil << endl;
+        }
+        {
+            cout << "Pilihan tidak tersedia." << endl;
+        }
+    }
+
     else
     {
         cout << "Pilihan algoritma tidak tersedia." << endl;
