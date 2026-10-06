@@ -5,7 +5,8 @@
 
 using namespace std;
 
-string hapusSpasi(string teks);
+string hapusSpasiTransposisi(string teks);
+string kelompokkanTransposisi(string teks, int jumlahHuruf);
 
 void tampilkanMatriksTransposisi(string teks, int kunci);
 

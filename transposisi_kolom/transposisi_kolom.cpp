@@ -3,7 +3,7 @@
 
 using namespace std;
 
-string hapusSpasi(string teks)
+string hapusSpasiTransposisi(string teks)
 {
     string hasil = "";
 
@@ -18,6 +18,33 @@ string hapusSpasi(string teks)
     return hasil;
 }
 
+string kelompokkanTransposisi(string teks, int jumlahHuruf)
+{
+    string hasil = "";
+
+    if (jumlahHuruf <= 0)
+    {
+        return teks;
+    }
+
+    int hitung = 0;
+
+    for (int i = 0; i < teks.length(); i++)
+    {
+        hasil += teks[i];
+        hitung++;
+
+        // memberi spasi setelah mencapai jumlah kelompok
+        if (hitung == jumlahHuruf && i != teks.length() - 1)
+        {
+            hasil += ' ';
+            hitung = 0;
+        }
+    }
+
+    return hasil;
+}
+
 void tampilkanMatriksTransposisi(string teks, int kunci)
 {
     if (kunci <= 0)
@@ -25,16 +52,18 @@ void tampilkanMatriksTransposisi(string teks, int kunci)
         return;
     }
 
-    teks = hapusSpasi(teks);
+    teks = hapusSpasiTransposisi(teks);
 
     int panjang = teks.length();
     int jumlahBaris = (panjang + kunci - 1) / kunci;
 
     cout << endl;
     cout << "Teks tanpa spasi: " << teks << endl;
+
     cout << endl;
     cout << "Matriks Transposisi:" << endl;
 
+    // menampilkan nomor kolom
     for (int kolom = 0; kolom < kunci; kolom++)
     {
         cout << kolom + 1 << " ";
@@ -42,6 +71,7 @@ void tampilkanMatriksTransposisi(string teks, int kunci)
 
     cout << endl;
 
+    // menampilkan isi matriks
     for (int baris = 0; baris < jumlahBaris; baris++)
     {
         for (int kolom = 0; kolom < kunci; kolom++)
@@ -71,12 +101,13 @@ string enkripsiTransposisi(string plainteks, int kunci)
         return "";
     }
 
-    plainteks = hapusSpasi(plainteks);
+    // spasi tidak ikut dalam proses transposisi
+    plainteks = hapusSpasiTransposisi(plainteks);
 
     int panjang = plainteks.length();
     int jumlahBaris = (panjang + kunci - 1) / kunci;
 
-    // membaca teks per kolom dari atas ke bawah
+    // membaca matriks dari atas ke bawah per kolom
     for (int kolom = 0; kolom < kunci; kolom++)
     {
         for (int baris = 0; baris < jumlahBaris; baris++)
@@ -102,9 +133,11 @@ string dekripsiTransposisi(string cipherteks, int kunci)
         return "";
     }
 
-    cipherteks = hapusSpasi(cipherteks);
+    // menghapus spasi dari hasil pengelompokan
+    cipherteks = hapusSpasiTransposisi(cipherteks);
 
     int panjang = cipherteks.length();
+
     int barisPenuh = panjang / kunci;
     int sisa = panjang % kunci;
 
@@ -115,7 +148,7 @@ string dekripsiTransposisi(string cipherteks, int kunci)
         jumlahBaris++;
     }
 
-    // mengembalikan karakter ke posisi awal
+    // membaca kembali matriks sesuai posisi awal
     for (int baris = 0; baris < jumlahBaris; baris++)
     {
         for (int kolom = 0; kolom < kunci; kolom++)
@@ -129,14 +162,18 @@ string dekripsiTransposisi(string cipherteks, int kunci)
 
             if (baris < panjangKolom)
             {
-                int tambahan = kolom;
+                int posisiAwal = kolom * barisPenuh;
 
-                if (kolom > sisa)
+                if (kolom < sisa)
                 {
-                    tambahan = sisa;
+                    posisiAwal += kolom;
+                }
+                else
+                {
+                    posisiAwal += sisa;
                 }
 
-                int posisi = kolom * barisPenuh + tambahan + baris;
+                int posisi = posisiAwal + baris;
 
                 plainteks += cipherteks[posisi];
             }
