@@ -6,27 +6,20 @@
 
 using namespace std;
 
-struct Riwayat
-{
+struct Riwayat{
     int algoritma;
-
-    // posisi x tambahan pada playfair
-    vector<int> posisiFiller;
-
-    // posisi spasi sebelum suatu lapisan dienkripsi
     vector<int> posisiSpasi;
+    vector<int> posisiFiller;
+    vector<int> posisiJ;
 };
 
-void tambahRiwayat(
-    vector<Riwayat> &riwayat,
-    Riwayat data);
+bool validasiPlainteksAwal(string teks);
+bool validasiHasilAkhir(string plainteksAwal, string hasilAkhir);
 
 vector<int> cariPosisiSpasi(string teks);
+string kembalikanSpasi(string teks, vector<int> posisiSpasi);
 
-string kembalikanSpasi(
-    string teks,
-    vector<int> posisiSpasi);
-
+void tambahRiwayat(vector<Riwayat> &riwayat, Riwayat data);
 string namaAlgoritma(int algoritma);
 
 #endif

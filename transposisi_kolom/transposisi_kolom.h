@@ -5,6 +5,10 @@
 
 using namespace std;
 
+bool validasiTeksTransposisi(string teks);
+bool validasiKunciTransposisi(string teks, int kunci);
+bool validasiKelompokTransposisi(int jumlahHuruf);
+
 string hapusSpasiTransposisi(string teks);
 string kelompokkanTransposisi(string teks, int jumlahHuruf);
 

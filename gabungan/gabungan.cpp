@@ -2,86 +2,65 @@
 
 using namespace std;
 
-void tambahRiwayat(
-    vector<Riwayat> &riwayat,
-    Riwayat data)
-{
-    riwayat.push_back(data);
+bool validasiPlainteksAwal(string teks){
+    if (teks.empty()) return false;
+
+    bool adaHuruf = false;
+
+    for (char karakter : teks){
+        if (karakter >= 'A' && karakter <= 'Z') adaHuruf = true;
+        else if (karakter != ' ') return false;
+    }
+
+    return adaHuruf;
 }
 
-vector<int> cariPosisiSpasi(string teks)
-{
-    vector<int> posisiSpasi;
+bool validasiHasilAkhir(string plainteksAwal, string hasilAkhir){
+    return plainteksAwal == hasilAkhir;
+}
 
-    for (int i = 0; i < teks.length(); i++)
-    {
-        if (teks[i] == ' ')
-        {
-            posisiSpasi.push_back(i);
-        }
+vector<int> cariPosisiSpasi(string teks){
+    vector<int> posisiSpasi;
+    int panjang = teks.length();
+
+    for (int i = 0; i < panjang; i++){
+        if (teks[i] == ' ') posisiSpasi.push_back(i);
     }
 
     return posisiSpasi;
 }
 
-bool adaPosisiSpasi(
-    vector<int> posisiSpasi,
-    int posisi)
-{
-    for (int isi : posisiSpasi)
-    {
-        if (isi == posisi)
-        {
-            return true;
-        }
+bool adaPosisiSpasi(vector<int> posisiSpasi, int posisi){
+    for (int isi : posisiSpasi){
+        if (isi == posisi) return true;
     }
 
     return false;
 }
 
-string kembalikanSpasi(
-    string teks,
-    vector<int> posisiSpasi)
-{
+string kembalikanSpasi(string teks, vector<int> posisiSpasi){
+    if (posisiSpasi.empty()) return teks;
+
     string hasil = "";
-
     int indexTeks = 0;
-    int panjangAsli =
-        teks.length() + posisiSpasi.size();
+    int panjangTeks = teks.length();
+    int panjangAsli = panjangTeks + posisiSpasi.size();
 
-    for (int i = 0; i < panjangAsli; i++)
-    {
-        if (adaPosisiSpasi(posisiSpasi, i))
-        {
-            hasil += ' ';
-        }
-        else
-        {
-            if (indexTeks < teks.length())
-            {
-                hasil += teks[indexTeks];
-                indexTeks++;
-            }
-        }
+    for (int i = 0; i < panjangAsli; i++){
+        if (adaPosisiSpasi(posisiSpasi, i)) hasil += ' ';
+        else if (indexTeks < panjangTeks) hasil += teks[indexTeks++];
     }
 
     return hasil;
 }
 
-string namaAlgoritma(int algoritma)
-{
-    if (algoritma == 1)
-    {
-        return "Caesar Cipher";
-    }
-    else if (algoritma == 2)
-    {
-        return "Playfair Cipher";
-    }
-    else if (algoritma == 3)
-    {
-        return "Transposisi Kolom";
-    }
+void tambahRiwayat(vector<Riwayat> &riwayat, Riwayat data){
+    riwayat.push_back(data);
+}
 
+string namaAlgoritma(int algoritma){
+    if (algoritma == 1) return "Caesar Cipher";
+    if (algoritma == 2) return "Playfair Cipher";
+    if (algoritma == 3) return "Transposisi Kolom";
     return "Tidak diketahui";
 }

@@ -6,36 +6,23 @@
 
 using namespace std;
 
-string bersihkanTeksPlayfair(string teks);
-
-string siapkanPlainteksPlayfair(string plainteks);
-
-string siapkanPlainteksPlayfairData(
-    string plainteks,
-    vector<int> &posisiFiller);
-
-string hapusFillerPlayfair(
-    string teks,
-    vector<int> posisiFiller);
-
-string kelompokkanPlayfair(
-    string teks,
-    int jumlahHuruf);
-
+bool validasiTeksPlayfair(string teks);
+bool validasiKunciPlayfair(string kunci);
 bool validasiCipherPlayfair(string cipherteks);
 
-void buatMatriksPlayfair(
-    string kunci,
-    char matriks[5][5]);
+string bersihkanKunciPlayfair(string kunci);
+string siapkanPlainteksPlayfair(string plainteks);
+string siapkanPlainteksPlayfairData(string plainteks, vector<int> &posisiFiller, vector<int> &posisiJ);
+string hapusFillerPlayfair(string teks, vector<int> posisiFiller);
+string kembalikanJPlayfair(string teks, vector<int> posisiJ);
+string kelompokkanPlayfair(string teks, int jumlahHuruf);
 
-void tampilkanMatriksPlayfair(string kunci);
+bool buatMatriksPlayfair(string kunci, char matriks[5][5]);
+bool tampilkanMatriksPlayfair(string kunci);
+bool cariPosisiPlayfair(char matriks[5][5], char huruf, int &baris, int &kolom);
 
-string enkripsiPlayfair(
-    string plainteks,
-    string kunci);
-
-string dekripsiPlayfair(
-    string cipherteks,
-    string kunci);
+string enkripsiPlayfair(string plainteks, string kunci);
+string enkripsiPlayfairData(string plainteks, string kunci, vector<int> &posisiFiller, vector<int> &posisiJ);
+string dekripsiPlayfair(string cipherteks, string kunci);
 
 #endif

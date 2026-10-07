@@ -5,6 +5,11 @@
 
 using namespace std;
 
+bool validasiTeksCaesar(string teks);
+bool validasiKelompokCaesar(int jumlahHuruf);
+
+int normalisasiKunciCaesar(int kunci);
+
 string hapusSpasiCaesar(string teks);
 string kelompokkanCaesar(string teks, int jumlahHuruf);
 

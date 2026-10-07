@@ -1,5 +1,52 @@
 #include "caesar.h"
 
+using namespace std;
+
+bool validasiTeksCaesar(string teks)
+{
+    if (teks.empty())
+    {
+        return false;
+    }
+
+    bool adaHuruf = false;
+
+    for (char karakter : teks)
+    {
+        if (karakter >= 'A' && karakter <= 'Z')
+        {
+            adaHuruf = true;
+        }
+        else if (karakter != ' ')
+        {
+            return false;
+        }
+    }
+
+    return adaHuruf;
+}
+
+bool validasiKelompokCaesar(int jumlahHuruf)
+{
+    if (jumlahHuruf < 0)
+    {
+        return false;
+    }
+
+    return true;
+}
+
+int normalisasiKunciCaesar(int kunci){
+    kunci = kunci % 26;
+
+    if (kunci < 0)
+    {
+        kunci += 26;
+    }
+
+    return kunci;
+}
+
 string hapusSpasiCaesar(string teks)
 {
     string hasil = "";
@@ -19,20 +66,27 @@ string kelompokkanCaesar(string teks, int jumlahHuruf)
 {
     string hasil = "";
 
-    if (jumlahHuruf <= 0)
+    if (jumlahHuruf == 0)
     {
         return teks;
     }
 
+    if (jumlahHuruf < 0)
+    {
+        return "";
+    }
+
+    teks = hapusSpasiCaesar(teks);
+
+    int panjang = teks.length();
     int hitung = 0;
 
-    for (int i = 0; i < teks.length(); i++)
+    for (int i = 0; i < panjang; i++)
     {
         hasil += teks[i];
         hitung++;
 
-        // memberi spasi setelah mencapai jumlah kelompok
-        if (hitung == jumlahHuruf && i != teks.length() - 1)
+        if (hitung == jumlahHuruf && i != panjang - 1)
         {
             hasil += ' ';
             hitung = 0;
@@ -46,32 +100,27 @@ string enkripsiCaesar(string plainteks, int kunci)
 {
     string cipherteks = "";
 
-    // spasi tidak ikut dalam proses enkripsi
-    plainteks = hapusSpasiCaesar(plainteks);
-
-    // menyesuaikan kunci ke rentang alfabet
-    kunci = kunci % 26;
-
-    if (kunci < 0)
+    if (!validasiTeksCaesar(plainteks))
     {
-        kunci += 26;
+        return "";
     }
 
-    for (char huruf : plainteks)
+    plainteks = hapusSpasiCaesar(plainteks);
+    kunci = normalisasiKunciCaesar(kunci);
+
+    int panjang = plainteks.length();
+
+    for (int i = 0; i < panjang; i++)
     {
-        // proses huruf besar
-        if (huruf >= 'A' && huruf <= 'Z')
-        {
-            huruf = 'A' + (huruf - 'A' + kunci) % 26;
-        }
+        char huruf = plainteks[i];
 
-        // proses huruf kecil
-        else if (huruf >= 'a' && huruf <= 'z')
-        {
-            huruf = 'a' + (huruf - 'a' + kunci) % 26;
-        }
+        // mengubah huruf menjadi nilai 0 sampai 25
+        int nilai = huruf - 'A';
 
-        cipherteks += huruf;
+        // rumus enkripsi caesar
+        nilai = (nilai + kunci) % 26;
+
+        cipherteks += char('A' + nilai);
     }
 
     return cipherteks;
@@ -81,32 +130,27 @@ string dekripsiCaesar(string cipherteks, int kunci)
 {
     string plainteks = "";
 
-    // menghapus spasi dari hasil pengelompokan
-    cipherteks = hapusSpasiCaesar(cipherteks);
-
-    // menyesuaikan kunci ke rentang alfabet
-    kunci = kunci % 26;
-
-    if (kunci < 0)
+    if (!validasiTeksCaesar(cipherteks))
     {
-        kunci += 26;
+        return "";
     }
 
-    for (char huruf : cipherteks)
+    // spasi pengelompokan tidak ikut didekripsi
+    cipherteks = hapusSpasiCaesar(cipherteks);
+    kunci = normalisasiKunciCaesar(kunci);
+
+    int panjang = cipherteks.length();
+
+    for (int i = 0; i < panjang; i++)
     {
-        // proses huruf besar
-        if (huruf >= 'A' && huruf <= 'Z')
-        {
-            huruf = 'A' + (huruf - 'A' - kunci + 26) % 26;
-        }
+        char huruf = cipherteks[i];
 
-        // proses huruf kecil
-        else if (huruf >= 'a' && huruf <= 'z')
-        {
-            huruf = 'a' + (huruf - 'a' - kunci + 26) % 26;
-        }
+        // mengubah huruf menjadi nilai 0 sampai 25
+        int nilai = huruf - 'A';
 
-        plainteks += huruf;
+        // rumus dekripsi caesar
+        nilai = (nilai - kunci + 26) % 26;
+        plainteks += char('A' + nilai);
     }
 
     return plainteks;

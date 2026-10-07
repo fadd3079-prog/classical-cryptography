@@ -9,401 +9,302 @@
 
 using namespace std;
 
-void tampilkanPilihanAlgoritma()
-{
-    cout << endl;
-    cout << "Pilih algoritma:" << endl;
-    cout << "1. Caesar Cipher" << endl;
-    cout << "2. Playfair Cipher" << endl;
-    cout << "3. Transposisi Kolom" << endl;
-    cout << "Pilih: ";
+int inputAngka(string pesan){
+    int nilai;
+
+    while (true){
+        cout << pesan;
+
+        if (cin >> nilai){
+            cin.ignore(10000, '\n');
+            return nilai;
+        }
+
+        cout << "Input harus berupa angka." << endl;
+        cin.clear();
+        cin.ignore(10000, '\n');
+    }
 }
 
-string prosesEnkripsi(
-    string teks,
-    int algoritma,
-    Riwayat &data)
-{
-    string hasil = "";
-    string tampilan = "";
+int pilihProses(){
+    while (true){
+        cout << endl;
+        cout << "1. Enkripsi" << endl;
+        cout << "2. Dekripsi" << endl;
+
+        int pilihan = inputAngka("Pilih proses: ");
+        if (pilihan == 1 || pilihan == 2) return pilihan;
+
+        cout << "Pilihan tidak tersedia." << endl;
+    }
+}
+
+int pilihAlgoritma(){
+    while (true){
+        cout << endl;
+        cout << "1. Caesar Cipher" << endl;
+        cout << "2. Playfair Cipher" << endl;
+        cout << "3. Transposisi Kolom" << endl;
+
+        int pilihan = inputAngka("Pilih algoritma: ");
+        if (pilihan >= 1 && pilihan <= 3) return pilihan;
+
+        cout << "Pilihan tidak tersedia." << endl;
+    }
+}
+
+int pilihKelompok(){
+    while (true){
+        int kelompok = inputAngka("Kelompokkan berapa huruf (0 = tanpa kelompok): ");
+
+        if (kelompok >= 0) return kelompok;
+        cout << "Jumlah kelompok tidak boleh negatif." << endl;
+    }
+}
+
+int pilihLanjutan(){
+    while (true){
+        cout << endl;
+        cout << "=== Proses Selanjutnya ===" << endl;
+        cout << "1. Enkripsi lagi" << endl;
+        cout << "2. Dekripsi semua" << endl;
+        cout << "3. Selesai" << endl;
+
+        int pilihan = inputAngka("Pilih: ");
+        if (pilihan >= 1 && pilihan <= 3) return pilihan;
+
+        cout << "Pilihan tidak tersedia." << endl;
+    }
+}
+
+bool prosesEnkripsi(string teks, int algoritma, Riwayat &data, string &hasil){
+    data.algoritma = algoritma;
+    data.posisiSpasi = cariPosisiSpasi(teks);
+    data.posisiFiller.clear();
+    data.posisiJ.clear();
 
     int kelompok;
-    data.algoritma = algoritma;
 
-    data.posisiFiller.clear();
-    data.posisiSpasi.clear();
+    if (algoritma == 1){
+        int kunci = inputAngka("Masukkan kunci Caesar: ");
 
-    // menyimpan posisi spasi sebelum dienkripsi
-    data.posisiSpasi = cariPosisiSpasi(teks);
+        hasil = enkripsiCaesar(teks, kunci);
+        if (hasil.empty()) return false;
 
-    // caesar cipher
-    if (algoritma == 1)
-    {
-        int kunci;
-
-        cout << endl;
-        cout << "=== Caesar Cipher ===" << endl;
-
-        cout << "Masukkan kunci: ";
-        cin >> kunci;
-
-        hasil = enkripsiCaesar(
-            teks,
-            kunci);
-
-        cout << "Kelompokkan berapa huruf" << endl;
-        cout << "(0 = tanpa kelompok): ";
-        cin >> kelompok;
-
-        tampilan = kelompokkanCaesar(
-            hasil,
-            kelompok);
+        kelompok = pilihKelompok();
+        cout << "Cipherteks: " << kelompokkanCaesar(hasil, kelompok) << endl;
     }
 
-    // playfair cipher
-    else if (algoritma == 2)
-    {
+    else if (algoritma == 2){
         string kunci;
 
-        cin.ignore(1000, '\n');
-
-        cout << endl;
-        cout << "=== Playfair Cipher ===" << endl;
-
-        cout << "Masukkan kunci: ";
+        cout << "Masukkan kunci Playfair: ";
         getline(cin, kunci);
+
+        if (!validasiKunciPlayfair(kunci)){
+            cout << "Kunci Playfair tidak valid." << endl;
+            return false;
+        }
 
         tampilkanMatriksPlayfair(kunci);
 
-        // menyimpan posisi x yang ditambahkan playfair
-        string teksSiap =
-            siapkanPlainteksPlayfairData(
-                teks,
-                data.posisiFiller);
+        string teksSiap = siapkanPlainteksPlayfair(teks);
+        cout << "Teks setelah disiapkan: " << teksSiap << endl;
 
-        cout << endl;
-        cout << "Teks setelah disiapkan: "
-             << teksSiap
-             << endl;
+        hasil = enkripsiPlayfairData(teks, kunci, data.posisiFiller, data.posisiJ);
+        if (hasil.empty()) return false;
 
-        hasil = enkripsiPlayfair(
-            teks,
-            kunci);
-
-        cout << "Kelompokkan berapa huruf" << endl;
-        cout << "(0 = tanpa kelompok): ";
-        cin >> kelompok;
-
-        tampilan = kelompokkanPlayfair(
-            hasil,
-            kelompok);
+        kelompok = pilihKelompok();
+        cout << "Cipherteks: " << kelompokkanPlayfair(hasil, kelompok) << endl;
     }
 
-    // transposisi kolom
-    else if (algoritma == 3)
-    {
-        int kunci;
+    else if (algoritma == 3){
+        int kunci = inputAngka("Masukkan jumlah kolom: ");
 
-        cout << endl;
-        cout << "=== Transposisi Kolom ===" << endl;
-
-        cout << "Masukkan jumlah kolom: ";
-        cin >> kunci;
-
-        if (kunci <= 0)
-        {
-            cout << "Kunci harus lebih dari 0." << endl;
-
-            return teks;
+        if (!validasiKunciTransposisi(teks, kunci)){
+            cout << "Kunci Transposisi tidak valid." << endl;
+            return false;
         }
 
-        tampilkanMatriksTransposisi(
-            teks,
-            kunci);
+        tampilkanMatriksTransposisi(teks, kunci);
 
-        hasil = enkripsiTransposisi(
-            teks,
-            kunci);
+        hasil = enkripsiTransposisi(teks, kunci);
+        if (hasil.empty()) return false;
 
-        cout << endl;
-        cout << "Kelompokkan berapa huruf" << endl;
-        cout << "(0 = tanpa kelompok): ";
-        cin >> kelompok;
-
-        tampilan = kelompokkanTransposisi(
-            hasil,
-            kelompok);
+        kelompok = pilihKelompok();
+        cout << "Cipherteks: " << kelompokkanTransposisi(hasil, kelompok) << endl;
     }
 
-    cout << endl;
-    cout << "Cipherteks: "
-         << tampilan
-         << endl;
-
-    // yang diteruskan bukan hasil pengelompokan
-    return hasil;
+    return true;
 }
 
-string prosesDekripsi(
-    string teks,
-    Riwayat data)
-{
-    string hasil = "";
-
+bool prosesDekripsi(string teks, Riwayat data, string &hasil){
     int algoritma = data.algoritma;
 
-    // caesar cipher
-    if (algoritma == 1)
-    {
-        int kunci;
+    if (algoritma == 1){
+        int kunci = inputAngka("Masukkan kunci Caesar: ");
 
-        cout << endl;
-        cout << "=== Dekripsi Caesar Cipher ==="
-             << endl;
-
-        cout << "Masukkan kunci: ";
-        cin >> kunci;
-
-        hasil = dekripsiCaesar(
-            teks,
-            kunci);
+        hasil = dekripsiCaesar(teks, kunci);
+        if (hasil.empty()) return false;
     }
 
-    // playfair cipher
-    else if (algoritma == 2)
-    {
+    else if (algoritma == 2){
         string kunci;
 
-        cin.ignore(1000, '\n');
+        if (!validasiCipherPlayfair(teks)){
+            cout << "Cipherteks Playfair tidak valid atau jumlah huruf ganjil." << endl;
+            return false;
+        }
 
-        cout << endl;
-        cout << "=== Dekripsi Playfair Cipher ==="
-             << endl;
-
-        cout << "Masukkan kunci: ";
+        cout << "Masukkan kunci Playfair: ";
         getline(cin, kunci);
 
-        // mengecek cipher sebelum diproses
-        if (!validasiCipherPlayfair(teks))
-        {
-            cout << endl;
-            cout << "Cipherteks Playfair tidak valid."
-                 << endl;
-
-            return teks;
+        if (!validasiKunciPlayfair(kunci)){
+            cout << "Kunci Playfair tidak valid." << endl;
+            return false;
         }
 
         tampilkanMatriksPlayfair(kunci);
 
-        hasil = dekripsiPlayfair(
-            teks,
-            kunci);
+        hasil = dekripsiPlayfair(teks, kunci);
+        if (hasil.empty()) return false;
 
-        cout << endl;
-        cout << "Hasil sebelum filler dihapus: "
-             << hasil
-             << endl;
+        // menghapus filler yang memang ditambahkan saat enkripsi
+        hasil = hapusFillerPlayfair(hasil, data.posisiFiller);
 
-        // menghapus hanya x yang dibuat oleh playfair
-        hasil = hapusFillerPlayfair(
-            hasil,
-            data.posisiFiller);
+        // mengembalikan i yang sebelumnya berasal dari j
+        hasil = kembalikanJPlayfair(hasil, data.posisiJ);
     }
 
-    // transposisi kolom
-    else if (algoritma == 3)
-    {
-        int kunci;
+    else if (algoritma == 3){
+        int kunci = inputAngka("Masukkan jumlah kolom: ");
 
-        cout << endl;
-        cout << "=== Dekripsi Transposisi Kolom ==="
-             << endl;
-
-        cout << "Masukkan jumlah kolom: ";
-        cin >> kunci;
-
-        if (kunci <= 0)
-        {
-            cout << "Kunci harus lebih dari 0." << endl;
-
-            return teks;
+        if (!validasiKunciTransposisi(teks, kunci)){
+            cout << "Kunci Transposisi tidak valid." << endl;
+            return false;
         }
 
-        hasil = dekripsiTransposisi(
-            teks,
-            kunci);
+        hasil = dekripsiTransposisi(teks, kunci);
+        if (hasil.empty()) return false;
     }
-    // mengembalikan spasi yang hilang pada lapisan ini
-    // mengembalikan spasi yang hilang pada lapisan ini
-    hasil = kembalikanSpasi(
-        hasil,
-        data.posisiSpasi);
 
-    cout << endl;
-    cout << "Hasil dekripsi: "
-         << hasil
-         << endl;
+    // mengembalikan spasi yang hilang pada lapisan ini
+    hasil = kembalikanSpasi(hasil, data.posisiSpasi);
 
-    return hasil;
+    cout << "Hasil dekripsi: " << hasil << endl;
+    return true;
 }
 
-int main()
-{
+void dekripsiBerlapis(string &teksAktif, vector<Riwayat> riwayat){
+    int jumlahLapisan = riwayat.size();
+
+    cout << endl;
+    cout << "=== Dekripsi Berlapis ===" << endl;
+
+    for (int i = jumlahLapisan - 1; i >= 0; i--){
+        cout << endl;
+        cout << "Lapisan " << i + 1 << ": " << namaAlgoritma(riwayat[i].algoritma) << endl;
+
+        bool berhasil = false;
+
+        while (!berhasil){
+            string hasil;
+            berhasil = prosesDekripsi(teksAktif, riwayat[i], hasil);
+
+            if (berhasil) teksAktif = hasil;
+            else cout << "Dekripsi gagal, coba masukkan data kembali." << endl;
+        }
+    }
+}
+
+int main(){
     string teksAktif;
-
-    int proses;
-
+    string plainteksAwal;
     vector<Riwayat> riwayat;
 
     cout << "=== Kriptografi Klasik ===" << endl;
-
-    cout << endl;
     cout << "Masukkan teks: ";
     getline(cin, teksAktif);
 
-    cout << endl;
-    cout << "Pilih proses:" << endl;
-    cout << "1. Enkripsi" << endl;
-    cout << "2. Dekripsi" << endl;
-    cout << "Pilih: ";
-    cin >> proses;
+    int proses = pilihProses();
 
-    // enkripsi berlapis
-    if (proses == 1)
-    {
-        bool programBerjalan = true;
-
-        while (programBerjalan)
-        {
-            int algoritma;
-
-            tampilkanPilihanAlgoritma();
-            cin >> algoritma;
-
-            if (algoritma < 1 || algoritma > 3)
-            {
-                cout << "Pilihan algoritma tidak tersedia."
-                     << endl;
-
-                continue;
-            }
-
-            Riwayat data;
-
-            teksAktif = prosesEnkripsi(
-                teksAktif,
-                algoritma,
-                data);
-
-            tambahRiwayat(
-                riwayat,
-                data);
-
-            cout << endl;
-            cout << "=== Proses Selanjutnya ==="
-                 << endl;
-
-            cout << "1. Enkripsi lagi" << endl;
-            cout << "2. Dekripsi" << endl;
-            cout << "3. Selesai" << endl;
-            cout << "Pilih: ";
-
-            int pilihan;
-            cin >> pilihan;
-
-            // enkripsi lapisan berikutnya
-            if (pilihan == 1)
-            {
-                continue;
-            }
-
-            // dekripsi semua lapisan
-            else if (pilihan == 2)
-            {
-                cout << endl;
-                cout << "=== Dekripsi Berlapis ==="
-                     << endl;
-
-                for (
-                    int i = riwayat.size() - 1;
-                    i >= 0;
-                    i--)
-                {
-                    cout << endl;
-
-                    cout << "Lapisan "
-                         << i + 1
-                         << ": "
-                         << namaAlgoritma(
-                                riwayat[i].algoritma)
-                         << endl;
-
-                    teksAktif = prosesDekripsi(
-                        teksAktif,
-                        riwayat[i]);
-                }
-
-                cout << endl;
-                cout << "=== Hasil Akhir ==="
-                     << endl;
-
-                cout << "Plainteks: "
-                     << teksAktif
-                     << endl;
-
-                programBerjalan = false;
-            }
-
-            // selesai tanpa dekripsi
-            else if (pilihan == 3)
-            {
-                cout << endl;
-
-                cout << "Cipherteks akhir: "
-                     << teksAktif
-                     << endl;
-
-                programBerjalan = false;
-            }
-
-            else
-            {
-                cout << "Pilihan tidak tersedia." << endl;
-            }
-        }
-    }
-
-    // dekripsi satu algoritma
-    else if (proses == 2)
-    {
-        int algoritma;
-
-        tampilkanPilihanAlgoritma();
-        cin >> algoritma;
-
-        if (algoritma < 1 || algoritma > 3)
-        {
-            cout << "Pilihan algoritma tidak tersedia." << endl;
-
+    if (proses == 1){
+        if (!validasiPlainteksAwal(teksAktif)){
+            cout << "Plainteks tidak valid." << endl;
+            cout << "Gunakan huruf kapital A-Z dan spasi saja." << endl;
             return 0;
         }
 
+        plainteksAwal = teksAktif;
+
+        while (true){
+            int algoritma = pilihAlgoritma();
+            Riwayat data;
+            string hasil;
+
+            cout << endl;
+            cout << "=== " << namaAlgoritma(algoritma) << " ===" << endl;
+
+            bool berhasil = prosesEnkripsi(teksAktif, algoritma, data, hasil);
+
+            if (!berhasil){
+                cout << "Enkripsi gagal. Riwayat tidak ditambahkan." << endl;
+                continue;
+            }
+
+            teksAktif = hasil;
+            tambahRiwayat(riwayat, data);
+
+            int pilihan = pilihLanjutan();
+
+            if (pilihan == 1) continue;
+
+            if (pilihan == 2){
+                dekripsiBerlapis(teksAktif, riwayat);
+
+                cout << endl;
+                cout << "=== Hasil Akhir ===" << endl;
+                cout << "Plainteks awal  : " << plainteksAwal << endl;
+                cout << "Hasil dekripsi : " << teksAktif << endl;
+
+                if (validasiHasilAkhir(plainteksAwal, teksAktif)){
+                    cout << "Validasi       : BERHASIL" << endl;
+                    cout << "Hasil dekripsi identik dengan plainteks awal." << endl;
+                }
+                else{
+                    cout << "Validasi       : GAGAL" << endl;
+                    cout << "Hasil dekripsi tidak identik dengan plainteks awal." << endl;
+                }
+
+                break;
+            }
+
+            if (pilihan == 3){
+                cout << endl;
+                cout << "Cipherteks akhir: " << teksAktif << endl;
+                break;
+            }
+        }
+    }
+
+    else{
+        int algoritma = pilihAlgoritma();
         Riwayat data;
+        string hasil;
 
         data.algoritma = algoritma;
 
-        teksAktif = prosesDekripsi(
-            teksAktif,
-            data);
+        cout << endl;
+        cout << "=== Dekripsi " << namaAlgoritma(algoritma) << " ===" << endl;
+
+        if (!prosesDekripsi(teksAktif, data, hasil)){
+            cout << "Dekripsi gagal." << endl;
+            return 0;
+        }
 
         cout << endl;
-        cout << "Plainteks: " << teksAktif << endl;
-    }
-
-    else
-    {
-        cout << "Pilihan proses tidak tersedia."
-             << endl;
+        cout << "Plainteks hasil dekripsi: " << hasil << endl;
+        cout << "Catatan: pemulihan spasi, J, dan filler penuh membutuhkan riwayat dari proses enkripsi." << endl;
     }
 
     return 0;
