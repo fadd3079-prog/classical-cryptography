@@ -4,12 +4,12 @@
 using namespace std;
 
 bool validasiTeksPlayfair(string teks){
-    if (teks.empty()) return false;
+    if (teks.empty()) return false; //teks kosong
 
-    bool adaHuruf = false;
+    bool adaHuruf = false; //inisialisasi
     for (char karakter : teks){
-        if (karakter >= 'A' && karakter <= 'Z') adaHuruf = true;
-        else if (karakter != ' ') return false;
+        if (karakter >= 'A' && karakter <= 'Z') adaHuruf = true; //pengecekan karakter kapital
+        else if (karakter != ' ') return false; //pengecekan karakter selain abc dan spasi
     }
 
     return adaHuruf;
@@ -36,16 +36,16 @@ bool validasiKunciPlayfair(string kunci){
 bool validasiCipherPlayfair(string cipherteks){
     if (cipherteks.empty()) return false;
 
-    int jumlahHuruf = 0;
+    int jumlahHuruf = 0; //inisialisasi
 
     for (char karakter : cipherteks){
-        if (karakter == ' ') continue;
-        if (karakter < 'A' || karakter > 'Z' || karakter == 'J') return false;
+        if (karakter == ' ') continue; //mengabaikan spasi
+        if (karakter < 'A' || karakter > 'Z' || karakter == 'J') return false; //memasitikan karakter adalah alpabet
         jumlahHuruf++;
     }
 
     // ciphertext diproses dalam pasangan huruf
-    return jumlahHuruf > 0 && jumlahHuruf % 2 == 0;
+    return jumlahHuruf > 0 && jumlahHuruf % 2 == 0; //cipher minimal satu dan genap
 }
 
 string hapusSpasiPlayfair(string teks){
@@ -60,10 +60,9 @@ string bersihkanKunciPlayfair(string kunci){
     string hasil = "";
 
     for (char huruf : kunci){
-        if (huruf >= 'a' && huruf <= 'z') huruf -= 32;
-
+        if (huruf >= 'a' && huruf <= 'z') huruf -= 32; //mengubah karakter menjadi kapital di ascii
         // j pada kunci dibuang, bukan diubah menjadi i
-        if (huruf >= 'A' && huruf <= 'Z' && huruf != 'J') hasil += huruf;
+        if (huruf >= 'A' && huruf <= 'Z' && huruf != 'J') hasil += huruf; //menghapus huruf j
     }
 
     return hasil;
@@ -84,17 +83,17 @@ bool buatMatriksPlayfair(string kunci, char matriks[5][5]){
     kunci = bersihkanKunciPlayfair(kunci);
 
     // huruf unik dari kunci menempati matriks lebih dulu
-    for (char huruf : kunci){
+    for (char huruf : kunci){ //looping mengurutkan karakter kunci
         if (!sudahAdaPlayfair(isiMatriks, huruf)) isiMatriks += huruf;
     }
 
     // melengkapi matriks dengan huruf yang belum dipakai
-    for (char huruf : alfabet){
+    for (char huruf : alfabet){ //looping mengurutkan karakter setelah kunci
         if (!sudahAdaPlayfair(isiMatriks, huruf)) isiMatriks += huruf;
     }
 
     int index = 0;
-    for (int baris = 0; baris < 5; baris++){
+    for (int baris = 0; baris < 5; baris++){ //looping menyusun kunci menjadi matriks
         for (int kolom = 0; kolom < 5; kolom++) matriks[baris][kolom] = isiMatriks[index++];
     }
 
@@ -105,7 +104,7 @@ bool tampilkanMatriksPlayfair(string kunci){
     char matriks[5][5];
     if (!buatMatriksPlayfair(kunci, matriks)) return false;
 
-    cout << "Matriks Playfair:" << endl;
+    cout << "Matriks Playfair:" << endl; //looping mencetak matrix
     for (int baris = 0; baris < 5; baris++){
         for (int kolom = 0; kolom < 5; kolom++) cout << matriks[baris][kolom] << " ";
         cout << endl;
@@ -153,26 +152,26 @@ string siapkanPlainteksPlayfairData(string plainteks, vector<int> &posisiFiller,
         char huruf1 = teks[i];
 
         // satu huruf tersisa dipasangkan dengan filler
-        if (i + 1 >= panjang){
+        if (i + 1 >= panjang){ //filler karakter ganjil
             hasil += huruf1;
             hasil += pilihFillerPlayfair(huruf1);
-            posisiFiller.push_back(hasil.length() - 1);
-            i++;
+            posisiFiller.push_back(hasil.length() - 1); //menyimpan index posisi filler
+            i++; //geser 1 karakter jika ada filler
         }
         else{
             char huruf2 = teks[i + 1];
 
             // huruf yang sama dipisah dan huruf kedua diproses lagi
-            if (huruf1 == huruf2){
+            if (huruf1 == huruf2){ //filler karakter sama
                 hasil += huruf1;
                 hasil += pilihFillerPlayfair(huruf1);
                 posisiFiller.push_back(hasil.length() - 1);
-                i++;
+                i++; //geser 1 karakter jika ada filler
             }
             else{
                 hasil += huruf1;
                 hasil += huruf2;
-                i += 2;
+                i += 2; //geser 2 karakter jika tidak ada filler
             }
         }
     }
@@ -235,7 +234,7 @@ string kelompokkanPlayfair(string teks, int jumlahHuruf){
 }
 
 bool cariPosisiPlayfair(char matriks[5][5], char huruf, int &baris, int &kolom){
-    baris = -1;
+    baris = -1; //inisialisasi
     kolom = -1;
 
     for (int i = 0; i < 5; i++){
@@ -257,9 +256,9 @@ string enkripsiPlayfairData(string plainteks, string kunci, vector<int> &posisiF
     char matriks[5][5];
     if (!buatMatriksPlayfair(kunci, matriks)) return "";
 
-    string teks = siapkanPlainteksPlayfairData(plainteks, posisiFiller, posisiJ);
+    string teks = siapkanPlainteksPlayfairData(plainteks, posisiFiller, posisiJ); //menambah filler dan mengganti j menjadi i
     string cipherteks = "";
-    int panjang = teks.length();
+    int panjang = teks.length(); //panjang sesuai input
 
     for (int i = 0; i < panjang; i += 2){
         char huruf1 = teks[i];
@@ -270,17 +269,17 @@ string enkripsiPlayfairData(string plainteks, string kunci, vector<int> &posisiF
         if (!cariPosisiPlayfair(matriks, huruf2, baris2, kolom2)) return "";
 
         // pasangan sebaris digeser satu kolom ke kanan
-        if (baris1 == baris2){
+        if (baris1 == baris2){ //pergeseran jika pada 1 baris yang sama
             cipherteks += matriks[baris1][(kolom1 + 1) % 5];
             cipherteks += matriks[baris2][(kolom2 + 1) % 5];
         }
         // pasangan sekolom digeser satu baris ke bawah
-        else if (kolom1 == kolom2){
+        else if (kolom1 == kolom2){ //pergeseran jika pada 1 kolom yang sama
             cipherteks += matriks[(baris1 + 1) % 5][kolom1];
             cipherteks += matriks[(baris2 + 1) % 5][kolom2];
         }
         // sudut persegi panjang diperoleh dengan menukar kolom
-        else{
+        else{ //pergeseran jika berbeda baris dan kolom
             cipherteks += matriks[baris1][kolom2];
             cipherteks += matriks[baris2][kolom1];
         }
@@ -290,9 +289,9 @@ string enkripsiPlayfairData(string plainteks, string kunci, vector<int> &posisiF
 }
 
 string enkripsiPlayfair(string plainteks, string kunci){
-    vector<int> posisiFiller;
-    vector<int> posisiJ;
-    return enkripsiPlayfairData(plainteks, kunci, posisiFiller, posisiJ);
+    vector<int> posisiFiller; //membuat tempat penyimpan filler/karakter tambahan
+    vector<int> posisiJ; //membuat tempat posisi penggantian huruf J;
+    return enkripsiPlayfairData(plainteks, kunci, posisiFiller, posisiJ); //menjalakan fungsi enkripsi
 }
 
 string dekripsiPlayfair(string cipherteks, string kunci){
@@ -301,7 +300,7 @@ string dekripsiPlayfair(string cipherteks, string kunci){
     char matriks[5][5];
     if (!buatMatriksPlayfair(kunci, matriks)) return "";
 
-    string teks = hapusSpasiPlayfair(cipherteks);
+    string teks = hapusSpasiPlayfair(cipherteks); //menghapus spasi
     string plainteks = "";
     int panjang = teks.length();
 
@@ -314,17 +313,17 @@ string dekripsiPlayfair(string cipherteks, string kunci){
         if (!cariPosisiPlayfair(matriks, huruf2, baris2, kolom2)) return "";
 
         // tambahan 4 setara dengan geser satu kolom ke kiri
-        if (baris1 == baris2){
+        if (baris1 == baris2){ //pergeseran jika pada 1 baris yang sama
             plainteks += matriks[baris1][(kolom1 + 4) % 5];
             plainteks += matriks[baris2][(kolom2 + 4) % 5];
         }
         // tambahan 4 setara dengan geser satu baris ke atas
-        else if (kolom1 == kolom2){
+        else if (kolom1 == kolom2){ //pergeseran jika pada 1 kolom yang sama
             plainteks += matriks[(baris1 + 4) % 5][kolom1];
             plainteks += matriks[(baris2 + 4) % 5][kolom2];
         }
         // aturan persegi panjang tetap menukar kolom
-        else{
+        else{ //pergeseran jika baris dan kolom yang berbeda
             plainteks += matriks[baris1][kolom2];
             plainteks += matriks[baris2][kolom1];
         }
