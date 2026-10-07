@@ -10,7 +10,7 @@
 
 #include <string>
 #include <vector>
-#include <cstdlib>
+#include <sstream>
 
 #include "../caesar/caesar.h"
 #include "../playfair/playfair.h"
@@ -20,428 +20,298 @@
 using namespace std;
 
 Fl_Multiline_Input *inputTeks;
-Fl_Choice *pilihProses;
 Fl_Choice *pilihAlgoritma;
 Fl_Input *inputKunci;
 Fl_Int_Input *inputKelompok;
 Fl_Multiline_Output *outputHasil;
+Fl_Multiline_Output *outputRiwayat;
 Fl_Box *status;
 
+string plainteksAwal = "";
+string teksAktif = "";
 vector<Riwayat> riwayat;
 
-string teksAktif = "";
-string hasilAktif = "";
+bool ubahKeAngka(string teks, int &nilai){
+    stringstream baca(teks);
+    char sisa;
 
-int ambilAngka(string teks)
-{
-    return atoi(teks.c_str());
+    if (!(baca >> nilai)) return false;
+    if (baca >> sisa) return false;
+
+    return true;
 }
 
-void prosesEnkripsi()
-{
+string buatRiwayat(){
+    if (riwayat.empty()) return "Belum ada lapisan.";
+
+    string hasil = "";
+
+    for (int i = 0; i < riwayat.size(); i++){
+        hasil += to_string(i + 1) + ". ";
+        hasil += namaAlgoritma(riwayat[i].algoritma);
+        hasil += "\n";
+    }
+
+    return hasil;
+}
+
+void perbaruiRiwayat(){
+    string teks = buatRiwayat();
+    outputRiwayat->value(teks.c_str());
+}
+
+void tampilkanHasil(string hasil){
+    outputHasil->value(hasil.c_str());
+    inputTeks->value(teksAktif.c_str());
+}
+
+void enkripsiKlik(Fl_Widget *, void *){
     string teks = inputTeks->value();
     string kunci = inputKunci->value();
-
     int algoritma = pilihAlgoritma->value() + 1;
-    int kelompok = ambilAngka(inputKelompok->value());
+    int kelompok = 0;
+
+    if (!ubahKeAngka(inputKelompok->value(), kelompok) || kelompok < 0){
+        status->label("Kelompok harus berupa angka 0 atau lebih.");
+        return;
+    }
+
+    if (riwayat.empty()){
+        if (!validasiPlainteksAwal(teks)){
+            status->label("Plainteks hanya boleh A-Z dan spasi.");
+            return;
+        }
+
+        plainteksAwal = teks;
+        teksAktif = teks;
+    }
+    else{
+        teks = teksAktif;
+    }
+
+    Riwayat data;
+    data.algoritma = algoritma;
+    data.posisiSpasi = cariPosisiSpasi(teks);
+    data.posisiFiller.clear();
+    data.posisiJ.clear();
 
     string hasil = "";
     string tampilan = "";
 
-    // jika sudah ada lapisan, gunakan hasil sebelumnya
-    if (!riwayat.empty())
-    {
-        teks = teksAktif;
+    if (algoritma == 1){
+        int kunciAngka;
+
+        if (!ubahKeAngka(kunci, kunciAngka)){
+            status->label("Kunci Caesar harus berupa angka.");
+            return;
+        }
+
+        hasil = enkripsiCaesar(teks, kunciAngka);
+        if (hasil.empty()){
+            status->label("Enkripsi Caesar gagal.");
+            return;
+        }
+
+        tampilan = kelompokkanCaesar(hasil, kelompok);
     }
 
-    if (teks.empty())
-    {
-        status->label("Teks belum diisi.");
+    else if (algoritma == 2){
+        if (!validasiKunciPlayfair(kunci)){
+            status->label("Kunci Playfair tidak valid.");
+            return;
+        }
+
+        hasil = enkripsiPlayfairData(teks, kunci, data.posisiFiller, data.posisiJ);
+
+        if (hasil.empty()){
+            status->label("Enkripsi Playfair gagal.");
+            return;
+        }
+
+        tampilan = kelompokkanPlayfair(hasil, kelompok);
+    }
+
+    else if (algoritma == 3){
+        int jumlahKolom;
+
+        if (!ubahKeAngka(kunci, jumlahKolom)){
+            status->label("Kunci Transposisi harus berupa angka.");
+            return;
+        }
+
+        if (!validasiKunciTransposisi(teks, jumlahKolom)){
+            status->label("Jumlah kolom tidak valid.");
+            return;
+        }
+
+        hasil = enkripsiTransposisi(teks, jumlahKolom);
+
+        if (hasil.empty()){
+            status->label("Enkripsi Transposisi gagal.");
+            return;
+        }
+
+        tampilan = kelompokkanTransposisi(hasil, kelompok);
+    }
+
+    teksAktif = hasil;
+    tambahRiwayat(riwayat, data);
+
+    tampilkanHasil(tampilan);
+    perbaruiRiwayat();
+
+    string pesan = "Enkripsi berhasil. Lapisan: " + to_string(riwayat.size());
+    status->copy_label(pesan.c_str());
+
+    inputKunci->value("");
+}
+
+void dekripsiKlik(Fl_Widget *, void *){
+    if (riwayat.empty()){
+        status->label("Tidak ada lapisan yang dapat didekripsi.");
         return;
     }
 
-    Riwayat data;
-
-    data.algoritma = algoritma;
-    data.posisiFiller.clear();
-
-    // menyimpan posisi spasi sebelum diproses
-    data.posisiSpasi = cariPosisiSpasi(teks);
-
-    // caesar cipher
-    if (algoritma == 1)
-    {
-        int kunciAngka = ambilAngka(kunci);
-
-        hasil = enkripsiCaesar(
-            teks,
-            kunciAngka);
-
-        tampilan = kelompokkanCaesar(
-            hasil,
-            kelompok);
-    }
-
-    // playfair cipher
-    else if (algoritma == 2)
-    {
-        if (kunci.empty())
-        {
-            status->label("Kunci Playfair belum diisi.");
-            return;
-        }
-
-        // menyimpan posisi filler playfair
-        siapkanPlainteksPlayfairData(
-            teks,
-            data.posisiFiller);
-
-        hasil = enkripsiPlayfair(
-            teks,
-            kunci);
-
-        tampilan = kelompokkanPlayfair(
-            hasil,
-            kelompok);
-    }
-
-    // transposisi kolom
-    else if (algoritma == 3)
-    {
-        int jumlahKolom = ambilAngka(kunci);
-
-        if (jumlahKolom <= 0)
-        {
-            status->label(
-                "Jumlah kolom harus lebih dari 0.");
-
-            return;
-        }
-
-        hasil = enkripsiTransposisi(
-            teks,
-            jumlahKolom);
-
-        tampilan = kelompokkanTransposisi(
-            hasil,
-            kelompok);
-    }
-
-    // menyimpan riwayat lapisan
-    tambahRiwayat(
-        riwayat,
-        data);
-
-    // hasil tanpa spasi kelompok
-    teksAktif = hasil;
-    hasilAktif = hasil;
-
-    outputHasil->value(
-        tampilan.c_str());
-
-    string pesan =
-        "Enkripsi berhasil. Jumlah lapisan: " + to_string(riwayat.size());
-
-    status->copy_label(
-        pesan.c_str());
-}
-
-void prosesDekripsi()
-{
-    string teks = inputTeks->value();
     string kunci = inputKunci->value();
-
+    Riwayat data = riwayat.back();
     string hasil = "";
 
-    // jika ada history gunakan cipher aktif
-    if (!riwayat.empty())
-    {
-        teks = teksAktif;
-    }
+    int algoritma = data.algoritma;
 
-    if (teks.empty())
-    {
-        status->label("Cipherteks belum diisi.");
-        return;
-    }
+    pilihAlgoritma->value(algoritma - 1);
 
-    int algoritma;
-    Riwayat data;
+    if (algoritma == 1){
+        int kunciAngka;
 
-    // jika ada history, algoritma diambil dari lapisan terakhir
-    if (!riwayat.empty())
-    {
-        data = riwayat[riwayat.size() - 1];
-
-        algoritma = data.algoritma;
-
-        pilihAlgoritma->value(
-            algoritma - 1);
-    }
-
-    // dekripsi biasa tanpa history
-    else
-    {
-        algoritma =
-            pilihAlgoritma->value() + 1;
-
-        data.algoritma = algoritma;
-    }
-
-    // caesar cipher
-    if (algoritma == 1)
-    {
-        int kunciAngka =
-            ambilAngka(kunci);
-
-        hasil = dekripsiCaesar(
-            teks,
-            kunciAngka);
-    }
-
-    // playfair cipher
-    else if (algoritma == 2)
-    {
-        if (kunci.empty())
-        {
-            status->label(
-                "Kunci Playfair belum diisi.");
-
+        if (!ubahKeAngka(kunci, kunciAngka)){
+            status->label("Masukkan kunci Caesar yang benar.");
             return;
         }
 
-        if (!validasiCipherPlayfair(teks))
-        {
-            status->label(
-                "Cipher Playfair tidak valid.");
+        hasil = dekripsiCaesar(teksAktif, kunciAngka);
 
+        if (hasil.empty()){
+            status->label("Dekripsi Caesar gagal.");
+            return;
+        }
+    }
+
+    else if (algoritma == 2){
+        if (!validasiCipherPlayfair(teksAktif)){
+            status->label("Cipher Playfair tidak valid.");
             return;
         }
 
-        hasil = dekripsiPlayfair(
-            teks,
-            kunci);
-
-        // menghapus x filler jika ada history
-        if (!riwayat.empty())
-        {
-            hasil = hapusFillerPlayfair(
-                hasil,
-                data.posisiFiller);
-        }
-    }
-
-    // transposisi kolom
-    else if (algoritma == 3)
-    {
-        int jumlahKolom =
-            ambilAngka(kunci);
-
-        if (jumlahKolom <= 0)
-        {
-            status->label(
-                "Jumlah kolom harus lebih dari 0.");
-
+        if (!validasiKunciPlayfair(kunci)){
+            status->label("Masukkan kunci Playfair yang benar.");
             return;
         }
 
-        hasil = dekripsiTransposisi(
-            teks,
-            jumlahKolom);
+        hasil = dekripsiPlayfair(teksAktif, kunci);
+
+        if (hasil.empty()){
+            status->label("Dekripsi Playfair gagal.");
+            return;
+        }
+
+        hasil = hapusFillerPlayfair(hasil, data.posisiFiller);
+        hasil = kembalikanJPlayfair(hasil, data.posisiJ);
     }
 
-    // mengembalikan spasi lapisan
-    if (!riwayat.empty())
-    {
-        hasil = kembalikanSpasi(
-            hasil,
-            data.posisiSpasi);
+    else if (algoritma == 3){
+        int jumlahKolom;
+
+        if (!ubahKeAngka(kunci, jumlahKolom)){
+            status->label("Masukkan jumlah kolom yang benar.");
+            return;
+        }
+
+        if (!validasiKunciTransposisi(teksAktif, jumlahKolom)){
+            status->label("Kunci Transposisi tidak valid.");
+            return;
+        }
+
+        hasil = dekripsiTransposisi(teksAktif, jumlahKolom);
+
+        if (hasil.empty()){
+            status->label("Dekripsi Transposisi gagal.");
+            return;
+        }
     }
+
+    hasil = kembalikanSpasi(hasil, data.posisiSpasi);
 
     teksAktif = hasil;
-    hasilAktif = hasil;
+    riwayat.pop_back();
 
-    outputHasil->value(
-        hasil.c_str());
+    tampilkanHasil(hasil);
+    perbaruiRiwayat();
 
-    // menghapus lapisan yang sudah didekripsi
-    if (!riwayat.empty())
-    {
-        riwayat.pop_back();
+    inputKunci->value("");
+
+    if (riwayat.empty()){
+        if (validasiHasilAkhir(plainteksAwal, teksAktif)){
+            status->label("Validasi BERHASIL - identik dengan plainteks awal.");
+        }
+        else{
+            status->label("Validasi GAGAL - hasil tidak identik.");
+        }
     }
-
-    string pesan =
-        "Dekripsi berhasil. Sisa lapisan: " + to_string(riwayat.size());
-
-    status->copy_label(
-        pesan.c_str());
-}
-
-void prosesKlik(Fl_Widget *, void *)
-{
-    int proses = pilihProses->value();
-
-    if (proses == 0)
-    {
-        prosesEnkripsi();
-    }
-    else
-    {
-        prosesDekripsi();
+    else{
+        string pesan = "Dekripsi berhasil. Sisa lapisan: " + to_string(riwayat.size());
+        status->copy_label(pesan.c_str());
     }
 }
 
-void hasilKeInput(Fl_Widget *, void *)
-{
-    if (hasilAktif.empty())
-    {
-        status->label("Belum ada hasil.");
-        return;
-    }
+void resetKlik(Fl_Widget *, void *){
+    plainteksAwal = "";
+    teksAktif = "";
+    riwayat.clear();
 
-    // memakai hasil asli tanpa spasi kelompok
-    inputTeks->value(
-        hasilAktif.c_str());
-
-    status->label(
-        "Hasil dipindahkan ke input.");
-}
-
-void resetKlik(Fl_Widget *, void *)
-{
     inputTeks->value("");
     inputKunci->value("");
     inputKelompok->value("0");
     outputHasil->value("");
+    outputRiwayat->value("Belum ada lapisan.");
 
-    pilihProses->value(0);
     pilihAlgoritma->value(0);
-
-    riwayat.clear();
-
-    teksAktif = "";
-    hasilAktif = "";
-
     status->label("");
 }
 
-int main()
-{
-    Fl_Window *window =
-        new Fl_Window(
-            520,
-            540,
-            "Kriptografi Klasik");
+int main(){
+    Fl_Window *window = new Fl_Window(650, 650, "Kriptografi Klasik");
 
-    Fl_Box *judul =
-        new Fl_Box(
-            20,
-            15,
-            480,
-            35,
-            "Kriptografi Klasik");
-
+    Fl_Box *judul = new Fl_Box(20, 15, 610, 35, "Kriptografi Klasik");
     judul->labelsize(20);
 
-    inputTeks =
-        new Fl_Multiline_Input(
-            120,
-            70,
-            360,
-            100,
-            "Teks:");
+    inputTeks = new Fl_Multiline_Input(130, 70, 480, 90, "Teks Aktif:");
 
-    pilihProses =
-        new Fl_Choice(
-            120,
-            190,
-            200,
-            30,
-            "Proses:");
-
-    pilihProses->add("Enkripsi");
-    pilihProses->add("Dekripsi");
-    pilihProses->value(0);
-
-    pilihAlgoritma =
-        new Fl_Choice(
-            120,
-            230,
-            200,
-            30,
-            "Algoritma:");
-
+    pilihAlgoritma = new Fl_Choice(130, 180, 220, 30, "Algoritma:");
     pilihAlgoritma->add("Caesar Cipher");
     pilihAlgoritma->add("Playfair Cipher");
     pilihAlgoritma->add("Transposisi Kolom");
     pilihAlgoritma->value(0);
 
-    inputKunci =
-        new Fl_Input(
-            120,
-            270,
-            200,
-            30,
-            "Kunci:");
+    inputKunci = new Fl_Input(130, 225, 220, 30, "Kunci:");
 
-    inputKelompok =
-        new Fl_Int_Input(
-            120,
-            310,
-            100,
-            30,
-            "Kelompok:");
-
+    inputKelompok = new Fl_Int_Input(130, 270, 100, 30, "Kelompok:");
     inputKelompok->value("0");
 
-    Fl_Button *tombolProses =
-        new Fl_Button(
-            120,
-            360,
-            110,
-            35,
-            "Proses");
+    Fl_Button *tombolEnkripsi = new Fl_Button(130, 320, 140, 35, "Enkripsi Lapisan");
+    Fl_Button *tombolDekripsi = new Fl_Button(280, 320, 140, 35, "Dekripsi Lapisan");
+    Fl_Button *tombolReset = new Fl_Button(430, 320, 100, 35, "Reset");
 
-    tombolProses->callback(
-        prosesKlik);
+    tombolEnkripsi->callback(enkripsiKlik);
+    tombolDekripsi->callback(dekripsiKlik);
+    tombolReset->callback(resetKlik);
 
-    Fl_Button *tombolLanjut =
-        new Fl_Button(
-            240,
-            360,
-            130,
-            35,
-            "Hasil - Input");
+    outputHasil = new Fl_Multiline_Output(130, 380, 480, 80, "Hasil:");
 
-    tombolLanjut->callback(
-        hasilKeInput);
+    outputRiwayat = new Fl_Multiline_Output(130, 480, 480, 90, "Riwayat:");
+    outputRiwayat->value("Belum ada lapisan.");
 
-    Fl_Button *tombolReset =
-        new Fl_Button(
-            380,
-            360,
-            100,
-            35,
-            "Reset");
-
-    tombolReset->callback(
-        resetKlik);
-
-    outputHasil =
-        new Fl_Multiline_Output(
-            120,
-            415,
-            360,
-            70,
-            "Hasil:");
-
-    status =
-        new Fl_Box(
-            100,
-            495,
-            400,
-            25,
-            "");
+    status = new Fl_Box(80, 590, 540, 35, "");
+    status->labelsize(13);
 
     window->end();
     window->show();
