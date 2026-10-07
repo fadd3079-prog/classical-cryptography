@@ -16,6 +16,7 @@ bool validasiPlainteksAwal(string teks){
 }
 
 bool validasiHasilAkhir(string plainteksAwal, string hasilAkhir){
+    // validasi berhasil hanya jika seluruh karakter sama persis
     return plainteksAwal == hasilAkhir;
 }
 
@@ -23,6 +24,7 @@ vector<int> cariPosisiSpasi(string teks){
     vector<int> posisiSpasi;
     int panjang = teks.length();
 
+    // menyimpan index spasi sebelum teks masuk ke algoritma
     for (int i = 0; i < panjang; i++){
         if (teks[i] == ' ') posisiSpasi.push_back(i);
     }
@@ -44,8 +46,10 @@ string kembalikanSpasi(string teks, vector<int> posisiSpasi){
     string hasil = "";
     int indexTeks = 0;
     int panjangTeks = teks.length();
+    // panjang awal mencakup spasi yang sebelumnya dihapus
     int panjangAsli = panjangTeks + posisiSpasi.size();
 
+    // menyisipkan spasi pada index tercatat sambil membaca huruf lain
     for (int i = 0; i < panjangAsli; i++){
         if (adaPosisiSpasi(posisiSpasi, i)) hasil += ' ';
         else if (indexTeks < panjangTeks) hasil += teks[indexTeks++];

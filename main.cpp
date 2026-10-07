@@ -20,6 +20,7 @@ int inputAngka(string pesan){
             return nilai;
         }
 
+        // menghapus fail state dan sisa input sebelum mencoba lagi
         cout << "Input harus berupa angka." << endl;
         cin.clear();
         cin.ignore(10000, '\n');
@@ -78,11 +79,13 @@ int pilihLanjutan(){
 }
 
 bool prosesEnkripsi(string teks, int algoritma, Riwayat &data, string &hasil){
+    // menyimpan jenis algoritma dan posisi spasi untuk lapisan ini
     data.algoritma = algoritma;
     data.posisiSpasi = cariPosisiSpasi(teks);
     data.posisiFiller.clear();
     data.posisiJ.clear();
 
+    // pengelompokan hanya mengubah tampilan ciphertext
     int kelompok;
 
     if (algoritma == 1){
@@ -111,6 +114,7 @@ bool prosesEnkripsi(string teks, int algoritma, Riwayat &data, string &hasil){
         string teksSiap = siapkanPlainteksPlayfair(teks);
         cout << "Teks setelah disiapkan: " << teksSiap << endl;
 
+        // posisi filler dan j ikut dicatat saat plaintext diproses
         hasil = enkripsiPlayfairData(teks, kunci, data.posisiFiller, data.posisiJ);
         if (hasil.empty()) return false;
 
@@ -139,6 +143,7 @@ bool prosesEnkripsi(string teks, int algoritma, Riwayat &data, string &hasil){
 }
 
 bool prosesDekripsi(string teks, Riwayat data, string &hasil){
+    // menggunakan algoritma yang tercatat pada lapisan ini
     int algoritma = data.algoritma;
 
     if (algoritma == 1){
@@ -201,12 +206,14 @@ void dekripsiBerlapis(string &teksAktif, vector<Riwayat> riwayat){
     cout << endl;
     cout << "=== Dekripsi Berlapis ===" << endl;
 
+    // membongkar lapisan dari urutan enkripsi paling akhir
     for (int i = jumlahLapisan - 1; i >= 0; i--){
         cout << endl;
         cout << "Lapisan " << i + 1 << ": " << namaAlgoritma(riwayat[i].algoritma) << endl;
 
         bool berhasil = false;
 
+        // meminta ulang kunci jika dekripsi lapisan gagal
         while (!berhasil){
             string hasil;
             berhasil = prosesDekripsi(teksAktif, riwayat[i], hasil);
@@ -235,6 +242,7 @@ int main(){
             return 0;
         }
 
+        // menyimpan teks asli untuk validasi setelah semua lapisan dibuka
         plainteksAwal = teksAktif;
 
         while (true){
@@ -252,6 +260,7 @@ int main(){
                 continue;
             }
 
+            // menambahkan metadata hanya setelah enkripsi berhasil
             teksAktif = hasil;
             tambahRiwayat(riwayat, data);
 
@@ -267,6 +276,7 @@ int main(){
                 cout << "Plainteks awal  : " << plainteksAwal << endl;
                 cout << "Hasil dekripsi : " << teksAktif << endl;
 
+                // hasil akhir harus identik dengan plaintext awal
                 if (validasiHasilAkhir(plainteksAwal, teksAktif)){
                     cout << "Validasi       : BERHASIL" << endl;
                     cout << "Hasil dekripsi identik dengan plainteks awal." << endl;
@@ -292,6 +302,7 @@ int main(){
         Riwayat data;
         string hasil;
 
+        // dekripsi langsung hanya memiliki jenis algoritma tanpa riwayat enkripsi
         data.algoritma = algoritma;
 
         cout << endl;

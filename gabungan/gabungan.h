@@ -6,6 +6,7 @@
 
 using namespace std;
 
+// metadata untuk memulihkan teks pada setiap lapisan enkripsi
 struct Riwayat{
     int algoritma;
     vector<int> posisiSpasi;

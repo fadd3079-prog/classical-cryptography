@@ -2,23 +2,18 @@
 
 using namespace std;
 
-bool validasiTeksCaesar(string teks)
-{
-    if (teks.empty())
-    {
+bool validasiTeksCaesar(string teks){
+    if (teks.empty()){
         return false;
     }
 
     bool adaHuruf = false;
 
-    for (char karakter : teks)
-    {
-        if (karakter >= 'A' && karakter <= 'Z')
-        {
+    for (char karakter : teks){
+        if (karakter >= 'A' && karakter <= 'Z'){
             adaHuruf = true;
         }
-        else if (karakter != ' ')
-        {
+        else if (karakter != ' '){
             return false;
         }
     }
@@ -26,10 +21,8 @@ bool validasiTeksCaesar(string teks)
     return adaHuruf;
 }
 
-bool validasiKelompokCaesar(int jumlahHuruf)
-{
-    if (jumlahHuruf < 0)
-    {
+bool validasiKelompokCaesar(int jumlahHuruf){
+    if (jumlahHuruf < 0){
         return false;
     }
 
@@ -37,24 +30,22 @@ bool validasiKelompokCaesar(int jumlahHuruf)
 }
 
 int normalisasiKunciCaesar(int kunci){
+    // membatasi pergeseran ke satu putaran alfabet
     kunci = kunci % 26;
 
-    if (kunci < 0)
-    {
+    // modulo negatif disesuaikan ke rentang 0 sampai 25
+    if (kunci < 0){
         kunci += 26;
     }
 
     return kunci;
 }
 
-string hapusSpasiCaesar(string teks)
-{
+string hapusSpasiCaesar(string teks){
     string hasil = "";
 
-    for (char karakter : teks)
-    {
-        if (karakter != ' ')
-        {
+    for (char karakter : teks){
+        if (karakter != ' '){
             hasil += karakter;
         }
     }
@@ -62,32 +53,28 @@ string hapusSpasiCaesar(string teks)
     return hasil;
 }
 
-string kelompokkanCaesar(string teks, int jumlahHuruf)
-{
+string kelompokkanCaesar(string teks, int jumlahHuruf){
     string hasil = "";
 
-    if (jumlahHuruf == 0)
-    {
+    if (jumlahHuruf == 0){
         return teks;
     }
 
-    if (jumlahHuruf < 0)
-    {
+    if (jumlahHuruf < 0){
         return "";
     }
 
+    // spasi di sini hanya dipakai untuk tampilan hasil
     teks = hapusSpasiCaesar(teks);
 
     int panjang = teks.length();
     int hitung = 0;
 
-    for (int i = 0; i < panjang; i++)
-    {
+    for (int i = 0; i < panjang; i++){
         hasil += teks[i];
         hitung++;
 
-        if (hitung == jumlahHuruf && i != panjang - 1)
-        {
+        if (hitung == jumlahHuruf && i != panjang - 1){
             hasil += ' ';
             hitung = 0;
         }
@@ -96,22 +83,20 @@ string kelompokkanCaesar(string teks, int jumlahHuruf)
     return hasil;
 }
 
-string enkripsiCaesar(string plainteks, int kunci)
-{
+string enkripsiCaesar(string plainteks, int kunci){
     string cipherteks = "";
 
-    if (!validasiTeksCaesar(plainteks))
-    {
+    if (!validasiTeksCaesar(plainteks)){
         return "";
     }
 
+    // spasi dihapus sebelum huruf digeser
     plainteks = hapusSpasiCaesar(plainteks);
     kunci = normalisasiKunciCaesar(kunci);
 
     int panjang = plainteks.length();
 
-    for (int i = 0; i < panjang; i++)
-    {
+    for (int i = 0; i < panjang; i++){
         char huruf = plainteks[i];
 
         // mengubah huruf menjadi nilai 0 sampai 25
@@ -126,12 +111,10 @@ string enkripsiCaesar(string plainteks, int kunci)
     return cipherteks;
 }
 
-string dekripsiCaesar(string cipherteks, int kunci)
-{
+string dekripsiCaesar(string cipherteks, int kunci){
     string plainteks = "";
 
-    if (!validasiTeksCaesar(cipherteks))
-    {
+    if (!validasiTeksCaesar(cipherteks)){
         return "";
     }
 
@@ -141,14 +124,14 @@ string dekripsiCaesar(string cipherteks, int kunci)
 
     int panjang = cipherteks.length();
 
-    for (int i = 0; i < panjang; i++)
-    {
+    for (int i = 0; i < panjang; i++){
         char huruf = cipherteks[i];
 
         // mengubah huruf menjadi nilai 0 sampai 25
         int nilai = huruf - 'A';
 
         // rumus dekripsi caesar
+        // tambahan 26 menjaga hasil pengurangan tetap tidak negatif
         nilai = (nilai - kunci + 26) % 26;
         plainteks += char('A' + nilai);
     }

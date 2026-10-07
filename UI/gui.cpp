@@ -36,6 +36,7 @@ bool ubahKeAngka(string teks, int &nilai){
     char sisa;
 
     if (!(baca >> nilai)) return false;
+    // menolak input yang masih memiliki karakter setelah angka
     if (baca >> sisa) return false;
 
     return true;
@@ -76,6 +77,7 @@ void enkripsiKlik(Fl_Widget *, void *){
         return;
     }
 
+    // input menjadi plaintext awal hanya pada lapisan pertama
     if (riwayat.empty()){
         if (!validasiPlainteksAwal(teks)){
             status->label("Plainteks hanya boleh A-Z dan spasi.");
@@ -89,6 +91,7 @@ void enkripsiKlik(Fl_Widget *, void *){
         teks = teksAktif;
     }
 
+    // metadata lapisan disiapkan sebelum algoritma dijalankan
     Riwayat data;
     data.algoritma = algoritma;
     data.posisiSpasi = cariPosisiSpasi(teks);
@@ -154,6 +157,7 @@ void enkripsiKlik(Fl_Widget *, void *){
         tampilan = kelompokkanTransposisi(hasil, kelompok);
     }
 
+    // hasil dan metadata disimpan setelah enkripsi berhasil
     teksAktif = hasil;
     tambahRiwayat(riwayat, data);
 
@@ -173,6 +177,7 @@ void dekripsiKlik(Fl_Widget *, void *){
     }
 
     string kunci = inputKunci->value();
+    // lapisan terakhir dibuka lebih dulu seperti stack
     Riwayat data = riwayat.back();
     string hasil = "";
 
@@ -214,6 +219,7 @@ void dekripsiKlik(Fl_Widget *, void *){
             return;
         }
 
+        // pemulihan memakai metadata dari lapisan playfair ini
         hasil = hapusFillerPlayfair(hasil, data.posisiFiller);
         hasil = kembalikanJPlayfair(hasil, data.posisiJ);
     }
@@ -239,9 +245,11 @@ void dekripsiKlik(Fl_Widget *, void *){
         }
     }
 
+    // spasi lapisan ini dipulihkan sebelum teks aktif diperbarui
     hasil = kembalikanSpasi(hasil, data.posisiSpasi);
 
     teksAktif = hasil;
+    // metadata lapisan dihapus setelah dekripsi berhasil
     riwayat.pop_back();
 
     tampilkanHasil(hasil);
@@ -249,6 +257,7 @@ void dekripsiKlik(Fl_Widget *, void *){
 
     inputKunci->value("");
 
+    // validasi akhir dilakukan setelah seluruh lapisan dibuka
     if (riwayat.empty()){
         if (validasiHasilAkhir(plainteksAwal, teksAktif)){
             status->label("Validasi BERHASIL - identik dengan plainteks awal.");

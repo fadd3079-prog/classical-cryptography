@@ -29,6 +29,7 @@ string hapusSpasiTransposisi(string teks){
 bool validasiKunciTransposisi(string teks, int kunci){
     if (kunci <= 0) return false;
 
+    // batas jumlah kolom dihitung setelah spasi dibuang
     teks = hapusSpasiTransposisi(teks);
     int panjang = teks.length();
 
@@ -46,6 +47,7 @@ string kelompokkanTransposisi(string teks, int jumlahHuruf){
     if (jumlahHuruf == 0) return teks;
     if (jumlahHuruf < 0) return "";
 
+    // spasi kelompok hanya dipakai saat menampilkan ciphertext
     teks = hapusSpasiTransposisi(teks);
 
     string hasil = "";
@@ -67,6 +69,7 @@ void tampilkanMatriksTransposisi(string teks, int kunci){
     teks = hapusSpasiTransposisi(teks);
 
     int panjang = teks.length();
+    // pembulatan ke atas menyediakan baris terakhir yang belum penuh
     int jumlahBaris = (panjang + kunci - 1) / kunci;
 
     cout << "Teks tanpa spasi: " << teks << endl;
@@ -80,6 +83,7 @@ void tampilkanMatriksTransposisi(string teks, int kunci){
             int posisi = baris * kunci + kolom;
 
             if (posisi < panjang) cout << teks[posisi] << " ";
+            // bagian kosong hanya ditandai saat matriks ditampilkan
             else cout << "- ";
         }
 
@@ -117,12 +121,14 @@ string dekripsiTransposisi(string cipherteks, int kunci){
 
     string plainteks = "";
     int panjang = cipherteks.length();
+    // sisa huruf dibagi ke kolom paling awal
     int barisPenuh = panjang / kunci;
     int sisa = panjang % kunci;
     int jumlahBaris = barisPenuh;
 
     if (sisa > 0) jumlahBaris++;
 
+    // membaca kembali ciphertext menurut urutan baris aslinya
     for (int baris = 0; baris < jumlahBaris; baris++){
         for (int kolom = 0; kolom < kunci; kolom++){
             int panjangKolom = barisPenuh;
@@ -130,6 +136,7 @@ string dekripsiTransposisi(string cipherteks, int kunci){
             if (kolom < sisa) panjangKolom++;
 
             if (baris < panjangKolom){
+                // mencari awal kolom dengan menghitung kolom yang lebih panjang
                 int posisiAwal = kolom * barisPenuh;
 
                 if (kolom < sisa) posisiAwal += kolom;
